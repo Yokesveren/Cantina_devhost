@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DeadDrop Coordination</string>
+    <string name="unlock_title">Enter Passcode</string>
+    <string name="unlock_sub">Offline Disaster Coordination Portal</string>
+    <string name="unlock_button">Unlock</string>
+    <string name="wrong_passcode">Incorrect passcode. Default is 1234.</string>
+
+    <string name="status_saved_here">Saved here</string>
+    <string name="status_peers_nearby">%1$d nearby</string>
+    <string name="status_conflicts">%1$d conflicts need resolution</string>
+
+    <string name="tile_need">NEED</string>
+    <string name="tile_supply">SUPPLY</string>
+    <string name="tile_shelter">SHELTER</string>
+    <string name="tile_person">PERSON FOUND</string>
+
+    <string name="open_items">Open Items</string>
+    <string name="add_need_title">Record Need</string>
+    <string name="add_person_title">Record Person Found/Missing</string>
+    <string name="add_shelter_title">Update Shelter</string>
+
+    <string name="confirm_save">Confirm &amp; Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="give_stock">Give Stock</string>
+    <string name="ask_region">Ask Region</string>
+    <string name="resolve_conflict">Resolve Conflict</string>
+    <string name="use_this_value">Use This Value</string>
+    <string name="panic_wipe">Panic Wipe</string>
+    <string name="panic_wipe_confirm">Wipe All Keys &amp; Ops Immediately</string>
+</resources>

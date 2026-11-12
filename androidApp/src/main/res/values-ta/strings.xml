@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">டெட் டிராப் ஒருங்கிணைப்பு</string>
+    <string name="unlock_title">கடவுச்சொல்லை உள்ளிடவும்</string>
+    <string name="unlock_sub">ஆஃப்லைன் பேரிடர் ஒருங்கிணைப்பு</string>
+    <string name="unlock_button">திறக்கவும்</string>
+    <string name="wrong_passcode">தவறான கடவுச்சொல்.</string>
+
+    <string name="status_saved_here">இங்கே சேமிக்கப்பட்டது</string>
+    <string name="status_peers_nearby">%1$d அருகில் உள்ளன</string>
+    <string name="status_conflicts">%1$d முரண்பாடுகள் தீர்க்கப்பட வேண்டும்</string>
+
+    <string name="tile_need">தேவை</string>
+    <string name="tile_supply">வழங்கல்</string>
+    <string name="tile_shelter">காப்பகம்</string>
+    <string name="tile_person">நபர் கண்டறியப்பட்டார்</string>
+
+    <string name="open_items">திறந்த உருப்படிகள்</string>
+    <string name="add_need_title">தேவையை பதிவுசெய்</string>
+    <string name="add_person_title">நபரை பதிவுசெய்</string>
+    <string name="add_shelter_title">காப்பகத்தை புதுப்பி</string>
+
+    <string name="confirm_save">உறுதிசெய்து சேமி</string>
+    <string name="cancel">ரத்துசெய்</string>
+    <string name="give_stock">சரக்கு வழங்கு</string>
+    <string name="ask_region">மண்டலத்திடம் கேளுங்கள்</string>
+    <string name="resolve_conflict">முரண்பாட்டை தீர்க்கவும்</string>
+    <string name="use_this_value">இந்த மதிப்பை பயன்படுத்து</string>
+    <string name="panic_wipe">அவசர நீக்கம்</string>
+    <string name="panic_wipe_confirm">அனைத்து தரவையும் உடனே நீக்கு</string>
+</resources>

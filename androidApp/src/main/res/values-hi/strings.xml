@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">डेडड्रॉप समन्वय</string>
+    <string name="unlock_title">पासकोड दर्ज करें</string>
+    <string name="unlock_sub">ऑफ़लाइन आपदा समन्वय पोर्टल</string>
+    <string name="unlock_button">अनलॉक करें</string>
+    <string name="wrong_passcode">गलत पासकोड। डिफॉल्ट 1234 है।</string>
+
+    <string name="status_saved_here">यहाँ सुरक्षित</string>
+    <string name="status_peers_nearby">%1$d पास में हैं</string>
+    <string name="status_conflicts">%1$d टकराव सुलझाने की आवश्यकता है</string>
+
+    <string name="tile_need">आवश्यकता</string>
+    <string name="tile_supply">आपूर्ति</string>
+    <string name="tile_shelter">आश्रय</string>
+    <string name="tile_person">व्यक्ति मिला</string>
+
+    <string name="open_items">खुली वस्तुएं</string>
+    <string name="add_need_title">आवश्यकता दर्ज करें</string>
+    <string name="add_person_title">व्यक्ति की स्थिति दर्ज करें</string>
+    <string name="add_shelter_title">आश्रय अपडेट करें</string>
+
+    <string name="confirm_save">पुष्टि करें और सहेजें</string>
+    <string name="cancel">रद्द करें</string>
+    <string name="give_stock">स्टॉक दें</string>
+    <string name="ask_region">क्षेत्र से पूछें</string>
+    <string name="resolve_conflict">टकराव सुलझाएं</string>
+    <string name="use_this_value">इस मान का उपयोग करें</string>
+    <string name="panic_wipe">पैनिक वाइप</string>
+    <string name="panic_wipe_confirm">सभी डेटा तुरंत हटाएं</string>
+</resources>

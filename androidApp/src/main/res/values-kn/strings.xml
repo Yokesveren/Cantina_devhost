@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ಡೆಡ್‌ಡ್ರಾಪ್ ಸಮನ್ವಯ</string>
+    <string name="unlock_title">ಪಾಸ್‌ಕೋಡ್ ನಮೂದಿಸಿ</string>
+    <string name="unlock_sub">ಆಫ್‌ಲೈನ್ ವಿಕೋಪ ಸಮನ್ವಯ ಪೋರ್ಟಲ್</string>
+    <string name="unlock_button">ಅನ್‌ಲಾಕ್ ಮಾಡಿ</string>
+    <string name="wrong_passcode">ತಪ್ಪು ಪಾಸ್‌ಕೋಡ್.</string>
+
+    <string name="status_saved_here">ಇಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ</string>
+    <string name="status_peers_nearby">%1$d ಹತ್ತಿರದಲ್ಲಿದ್ದಾರೆ</string>
+    <string name="status_conflicts">%1$d ಸಂಘರ್ಷಗಳನ್ನು ಪರಿಹರಿಸಬೇಕಾಗಿದೆ</string>
+
+    <string name="tile_need">ಅಗತ್ಯ</string>
+    <string name="tile_supply">ಪೂರೈಕೆ</string>
+    <string name="tile_shelter">ಆಶ್ರಯ</string>
+    <string name="tile_person">ವ್ಯಕ್ತಿ ಪತ್ತೆಯಾಗಿದ್ದಾರೆ</string>
+
+    <string name="open_items">ಮುಕ್ತ ಐಟಂಗಳು</string>
+    <string name="add_need_title">ಅಗತ್ಯ ದಾಖಲಿಸಿ</string>
+    <string name="add_person_title">ವ್ಯಕ್ತಿ ದಾಖಲಿಸಿ</string>
+    <string name="add_shelter_title">ಆಶ್ರಯ ನವೀಕರಿಸಿ</string>
+
+    <string name="confirm_save">ಖಚಿತಪಡಿಸಿ ಮತ್ತು ಉಳಿಸಿ</string>
+    <string name="cancel">ರದ್ದುಮಾಡಿ</string>
+    <string name="give_stock">ಸ್ಟಾಕ್ ನೀಡಿ</string>
+    <string name="ask_region">ಪ್ರದೇಶವನ್ನು ಕೇಳಿ</string>
+    <string name="resolve_conflict">ಸಂಘರ್ಷ ಪರಿಹರಿಸಿ</string>
+    <string name="use_this_value">ಈ ಮೌಲ್ಯ ಬಳಸಿ</string>
+    <string name="panic_wipe">ಪ್ಯಾನಿಕ್ ವೈಪ್</string>
+    <string name="panic_wipe_confirm">ಎಲ್ಲಾ ಡೇಟಾವನ್ನು ತಕ್ಷಣ ಅಳಿಸಿ</string>
+</resources>
