@@ -1055,17 +1055,39 @@ fun SettingsScreen(
                 items(ops) { op ->
                     val bodyHex = op.body.joinToString("") { "%02x".format(it) }.take(24) + "..."
                     val sigHex = op.sig.joinToString("") { "%02x".format(it) }.take(16) + "..."
+                    val (prioLabel, prioColor) = when (op.priority) {
+                        0 -> Pair("P0 · CRITICAL", EmergencyRed)
+                        1 -> Pair("P1 · NORMAL", Color(0xFF1976D2))
+                        2 -> Pair("P2 · LOW", Color(0xFF757575))
+                        else -> Pair("P${op.priority}", Color.Gray)
+                    }
+
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = TileCardBg),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Column(modifier = Modifier.padding(8.dp)) {
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 Text("ID: ${op.id} (${op.kind})", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = DarkNavyText)
-                                Text("Prio: ${op.priority} | Reg: ${op.region}", fontSize = 11.sp, color = LightSubtext)
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = prioColor
+                                ) {
+                                    Text(
+                                        prioLabel,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 10.sp,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
                             }
-                            Spacer(modifier = Modifier.height(2.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text("Encrypted Body: $bodyHex", fontSize = 10.sp, color = EmergencyRed, fontWeight = FontWeight.SemiBold)
                             Text("Signature: $sigHex", fontSize = 10.sp, color = LightSubtext)
                         }

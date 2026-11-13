@@ -55,6 +55,64 @@ data class FieldUpdate(
     val replacesOpIds: List<String>
 )
 
+object PriorityMapper {
+    fun forNeed(urgency: String, status: String = "open"): Int {
+        if (status.equals("Closed", ignoreCase = true) || status.equals("Done", ignoreCase = true)) {
+            return 2 // Low
+        }
+        val numUrgency = urgency.toIntOrNull()
+        if (numUrgency != null) {
+            return when {
+                numUrgency >= 3 -> 0
+                numUrgency == 2 -> 1
+                else -> 2
+            }
+        }
+        val u = urgency.trim().lowercase()
+        return when (u) {
+            "critical", "high" -> 0
+            "normal", "medium" -> 1
+            "low" -> 2
+            else -> 1
+        }
+    }
+
+    fun forPerson(status: String, condition: String): Int {
+        val s = status.trim().lowercase()
+        val c = condition.trim().lowercase()
+        if (c == "critical" || c == "injured" || s == "missing") {
+            return 0 // Critical
+        }
+        if (s == "found" && (c == "safe" || c == "ok")) {
+            return 1 // Normal
+        }
+        return 1
+    }
+
+    fun forStockMove(item: String, fromAccount: String, targetAccount: String): Int {
+        val i = item.trim().lowercase()
+        val isScarce = i == "boat" || i == "medkit"
+        val isCrossRegion = targetAccount.startsWith("pool:") || targetAccount.startsWith("region:") || fromAccount.startsWith("pool:")
+        if (isScarce || isCrossRegion) {
+            return 0 // Critical
+        }
+        return 1 // Normal
+    }
+
+    fun forShelter(status: String): Int {
+        val s = status.trim().lowercase()
+        if (s == "full" || s == "emergency") {
+            return 0 // Critical
+        }
+        if (s == "closed" || s == "done") {
+            return 2 // Low
+        }
+        return 1 // Normal
+    }
+
+    fun forConflictResolution(): Int = 0 // Critical
+}
+
 @OptIn(ExperimentalEncodingApi::class)
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val crypto = createCrypto()
@@ -172,47 +230,78 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun addNeed(category: String, peopleCount: Int, urgency: String, note: String) {
         val seq = System.currentTimeMillis()
         val entityId = "need:${localNode.deviceId}:$seq"
-        localNode.createSetOp(entityId, "category", category, region = "A")
-        localNode.createSetOp(entityId, "peopleCount", peopleCount.toString(), region = "A")
-        localNode.createSetOp(entityId, "urgency", urgency, region = "A")
-        localNode.createSetOp(entityId, "note", note, region = "A")
-        localNode.createSetOp(entityId, "status", "open", region = "A")
+        val prio = PriorityMapper.forNeed(urgency, "open")
+        localNode.createSetOp(entityId, "category", category, region = "A", priority = prio)
+        localNode.createSetOp(entityId, "peopleCount", peopleCount.toString(), region = "A", priority = prio)
+        localNode.createSetOp(entityId, "urgency", urgency, region = "A", priority = prio)
+        localNode.createSetOp(entityId, "note", note, region = "A", priority = prio)
+        localNode.createSetOp(entityId, "status", "open", region = "A", priority = prio)
         refreshState()
     }
 
     fun addPerson(name: String, ageGroup: String, condition: String, status: String, whereNow: String = "", note: String = "") {
         val seq = System.currentTimeMillis()
         val entityId = "person:${localNode.deviceId}:$seq"
-        localNode.createSetOp(entityId, "displayName", name, region = "A")
-        localNode.createSetOp(entityId, "ageGroup", ageGroup, region = "A")
-        localNode.createSetOp(entityId, "condition", condition, region = "A")
-        localNode.createSetOp(entityId, "status", status, region = "A")
-        if (whereNow.isNotBlank()) localNode.createSetOp(entityId, "whereNow", whereNow, region = "A")
-        if (note.isNotBlank()) localNode.createSetOp(entityId, "note", note, region = "A")
+        val prio = PriorityMapper.forPerson(status, condition)
+        localNode.createSetOp(entityId, "displayName", name, region = "A", priority = prio)
+        localNode.createSetOp(entityId, "ageGroup", ageGroup, region = "A", priority = prio)
+        localNode.createSetOp(entityId, "condition", condition, region = "A", priority = prio)
+        localNode.createSetOp(entityId, "status", status, region = "A", priority = prio)
+        if (whereNow.isNotBlank()) localNode.createSetOp(entityId, "whereNow", whereNow, region = "A", priority = prio)
+        if (note.isNotBlank()) localNode.createSetOp(entityId, "note", note, region = "A", priority = prio)
         refreshState()
     }
 
     fun editEntityFields(entityId: String, updates: List<FieldUpdate>) {
+        val currentState = localNode.getDerivedState()
+        val existingEntity = currentState.entities[entityId]
+        val existingFields = existingEntity?.fields ?: emptyMap()
+
+        val updatedFields = existingFields.toMutableMap()
+        for (up in updates) {
+            updatedFields[up.field] = up.newValue
+        }
+
+        val prio = when {
+            entityId.startsWith("need:") -> {
+                val urgency = updatedFields["urgency"] ?: "Normal"
+                val status = updatedFields["status"] ?: "open"
+                PriorityMapper.forNeed(urgency, status)
+            }
+            entityId.startsWith("person:") -> {
+                val status = updatedFields["status"] ?: "Found"
+                val condition = updatedFields["condition"] ?: "Safe"
+                PriorityMapper.forPerson(status, condition)
+            }
+            entityId.startsWith("shelter:") -> {
+                val status = updatedFields["status"] ?: "Open"
+                PriorityMapper.forShelter(status)
+            }
+            else -> 1
+        }
+
         for (update in updates) {
-            localNode.createSetOp(entityId, update.field, update.newValue, replaces = update.replacesOpIds, region = "A")
+            localNode.createSetOp(entityId, update.field, update.newValue, replaces = update.replacesOpIds, region = "A", priority = prio)
         }
         refreshState()
     }
 
-    fun addShelter(name: String, capacity: Int, occupancy: Int, locationText: String = "Main Road") {
+    fun addShelter(name: String, capacity: Int, occupancy: Int, locationText: String = "Main Road", status: String = "Open") {
         val seq = System.currentTimeMillis()
         val entityId = "shelter:${localNode.deviceId}:$seq"
-        localNode.createSetOp(entityId, "name", name, region = "A")
-        localNode.createSetOp(entityId, "capacity", capacity.toString(), region = "A")
-        localNode.createSetOp(entityId, "occupancy", occupancy.toString(), region = "A")
-        localNode.createSetOp(entityId, "locationText", locationText, region = "A")
-        localNode.createSetOp(entityId, "status", "Open", region = "A")
+        val prio = PriorityMapper.forShelter(status)
+        localNode.createSetOp(entityId, "name", name, region = "A", priority = prio)
+        localNode.createSetOp(entityId, "capacity", capacity.toString(), region = "A", priority = prio)
+        localNode.createSetOp(entityId, "occupancy", occupancy.toString(), region = "A", priority = prio)
+        localNode.createSetOp(entityId, "locationText", locationText, region = "A", priority = prio)
+        localNode.createSetOp(entityId, "status", status, region = "A", priority = prio)
         refreshState()
     }
 
     fun giveStock(item: String, targetAccount: String, amount: Long): Boolean {
         val fromAccount = "dev:${localNode.deviceId}"
-        val moveOp = localNode.createMoveOp(item, fromAccount, targetAccount, amount, region = "A")
+        val prio = PriorityMapper.forStockMove(item, fromAccount, targetAccount)
+        val moveOp = localNode.createMoveOp(item, fromAccount, targetAccount, amount, region = "A", priority = prio)
         if (moveOp != null) {
             refreshState()
             return true
@@ -221,7 +310,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun resolveConflict(entityId: String, field: String, chosenValue: String, replacesOpIds: List<String>) {
-        localNode.createSetOp(entityId, field, chosenValue, replaces = replacesOpIds, region = "A")
+        val prio = PriorityMapper.forConflictResolution() // 0 (Critical)
+        localNode.createSetOp(entityId, field, chosenValue, replaces = replacesOpIds, region = "A", priority = prio)
         refreshState()
     }
 

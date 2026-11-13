@@ -369,4 +369,35 @@ class ScenarioSuiteTest {
         assertEquals(20L, totalInAccounts, "Total medkit stock conserved")
         assertTrue(state.alerts.isEmpty(), "No unexpected integrity alerts")
     }
+
+    @Test
+    fun test14_PrioritySyncOrdering() = runBlocking {
+        val (network, nodes) = setupTestNodes(2)
+        val (n1, n2) = nodes
+
+        // Split n1 and n2
+        network.setLinkCut(n1.deviceId, n2.deviceId, true)
+
+        // n1 creates 5 low priority ops (P2) first
+        for (i in 1..5) {
+            n1.createSetOp("task:$i", "status", "closed", priority = 2, region = "A")
+        }
+
+        // n1 creates 1 critical priority op (P0) afterwards
+        val criticalOp = n1.createSetOp("need:critical", "urgency", "Critical", priority = 0, region = "A")
+
+        // Rejoin and verify missingOps sorting for n2
+        network.setLinkCut(n1.deviceId, n2.deviceId, false)
+
+        val summaryN2 = com.example.deaddrop.core.sync.RangeSetSummary.fromOps(n2.opStore.getAllOps())
+        val missingOpsForN2 = summaryN2.missingOps(n1.opStore.getAllOps())
+            .sortedWith(compareBy({ it.priority }, { it.dev }, { it.seq }))
+
+        assertEquals(0, missingOpsForN2.first().priority, "Priority 0 (Critical) op is sorted first for transfer")
+        assertEquals(criticalOp.id, missingOpsForN2.first().id)
+        assertEquals(2, missingOpsForN2.last().priority, "Priority 2 (Low) op is sorted last for transfer")
+
+        syncAll(nodes)
+        assertEquals(n1.stateHash(), n2.stateHash())
+    }
 }
