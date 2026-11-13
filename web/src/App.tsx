@@ -24,6 +24,7 @@ import RegisterDoctor from "./views/RegisterDoctor";
 import WelcomeScreen from "./components/WelcomeScreen";
 import { EmergencySOSModal, AshaConnectionApprovalModal } from "./components/DoctorNotificationModals";
 import RealtimePatientModal from "./components/RealtimePatientModal";
+import { LocalUplinkBanner } from "./components/LocalUplinkBanner";
 import { useAuth } from "./auth/AuthContext";
 import { ViewType } from "./types";
 // DeadDrop HQ views
@@ -178,6 +179,9 @@ export default function App() {
 
         {/* White content sheet */}
         <div className="app-sheet flex flex-col min-w-0">
+          {/* Local network uplink banner from mobile device */}
+          <LocalUplinkBanner />
+
           {/* Sticky top header (inside the sheet) */}
           <Header onNavigate={navigate} />
 
