@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The SevaSetu mark (web/src/components/StaffShell.tsx `Mark`): an arch over the water line, scaled into the
+     adaptive icon's 66dp safe zone (30-unit artwork x 2.2, offset 21). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M32,67.2 Q54,32 76,67.2"
+        android:strokeWidth="7.48"
+        android:strokeColor="#FFFFFF"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M29.8,67.2 h48.4 v7.48 h-48.4 z"
+        android:fillColor="#FFFFFF" />
+</vector>

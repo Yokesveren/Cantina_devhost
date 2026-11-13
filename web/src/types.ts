@@ -1,0 +1,25 @@
+export type ViewType =
+  // ── DeadDrop HQ ──────────────────────────────────────────────────────────
+  | "dd-overview"
+  | "dd-missing-persons"
+  | "dd-shelter-occupancy"
+  | "dd-supply-ledger"
+  | "dd-field-nodes"
+  | "dd-crypto-audit"
+  // ── SevaSethu PHC Portal ──────────────────────────────────────────────────
+  | "dashboard"
+  | "patients"
+  | "triage"
+  | "referrals"
+  | "appointments"
+  | "admin-appointments"
+  | "asha"
+  | "inventory"
+  | "admin-doctors"
+  | "followups"
+  | "sos"
+  | "reports"
+  | "settings"
+  | "design-system"
+  | "register-admin"
+  | "register-doctor";

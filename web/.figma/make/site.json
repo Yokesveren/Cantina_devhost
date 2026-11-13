@@ -1,0 +1,14 @@
+{
+  "title": "SeVaSetu — National PHC Management Portal | MoHFW, Govt of India",
+  "description": "SeVaSetu: Primary Health Centre Management & Tele-Triage Network linking ASHA grassroot workers, PHC Medical Officers, and District Hospitals.",
+  "icons": {
+    "icon": "/sevasetu-logo.png"
+  },
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

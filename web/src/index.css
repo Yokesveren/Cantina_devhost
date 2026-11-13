@@ -1,0 +1,247 @@
+@import url('https://fonts.googleapis.com/css2?family=Chivo:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Noto+Sans+Kannada:wght@400;600;700&family=Noto+Sans+Tamil:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap');
+@import 'tailwindcss';
+@import 'leaflet/dist/leaflet.css';
+
+/* ─── Byteclub-inspired design tokens ─────────────────────────────────── */
+:root {
+  /* Frame (sidebar / outer shell) — deep navy night */
+  --frame:         #0b2a3c;
+  --frame-mid:     #0f3449;
+  --frame-raised:  #133a53;
+
+  /* Sheet (main content area) — clean white */
+  --sheet:         #ffffff;
+  --raised:        #f5f8fa;
+  --edge:          #e1e7ec;
+  --rule:          #eef2f5;
+
+  /* Ink */
+  --ink:           #0b2a3c;
+  --muted:         #56636b;
+  --soft:          #8a9aa6;
+
+  /* Accent — clinical teal */
+  --accent:        #0b7a75;
+  --accent-light:  #0d918c;
+  --mint:          #9fe5cf;   /* active nav pill + highlights */
+
+  /* Band palette — ward chapter colours */
+  --ward:          #dcecf7;
+  --linen:         #edf3f8;
+  --sand:          #f0f5fa;
+
+  /* Status — separate from brand, never reused */
+  --red-500:       #c4242a;
+  --red-100:       #fee2e2;
+  --amber-500:     #d99a00;
+  --amber-100:     #fff1c2;
+  --green-500:     #2f8a55;
+  --green-100:     #dcf5e4;
+  --blue-500:      #1e40af;
+  --blue-100:      #dbeafe;
+}
+
+@theme {
+  /* Surfaces */
+  --color-phc-frame:          var(--frame);
+  --color-phc-frame-mid:      var(--frame-mid);
+  --color-phc-frame-raised:   var(--frame-raised);
+  --color-phc-sheet:          var(--sheet);
+  --color-phc-raised:         var(--raised);
+  --color-phc-edge:           var(--edge);
+
+  /* Brand */
+  --color-phc-accent:         var(--accent);
+  --color-phc-mint:           var(--mint);
+  --color-phc-ink:            var(--ink);
+  --color-phc-muted:          var(--muted);
+
+  /* Legacy compat (keep old Tailwind classes working) */
+  --color-phc-blue:           #1565c0;
+  --color-phc-blue-dark:      #0d47a1;
+  --color-phc-blue-light:     #e3f2fd;
+  --color-phc-blue-mid:       #1976d2;
+  --color-phc-green:          var(--accent);
+  --color-phc-green-dark:     #065f5b;
+  --color-phc-green-light:    #e0f2f1;
+  --color-phc-bg:             var(--raised);
+  --color-phc-surface:        var(--sheet);
+  --color-phc-border:         var(--edge);
+  --color-phc-border-light:   var(--rule);
+  --color-phc-text:           var(--ink);
+  --color-phc-subtle:         #334155;
+
+  /* Sidebar tokens (mapped to frame palette) */
+  --color-phc-sidebar:        var(--frame);
+  --color-phc-sidebar-hover:  var(--frame-mid);
+  --color-phc-sidebar-active: var(--accent);
+  --color-phc-sidebar-text:   #c9d2d9;
+  --color-phc-sidebar-icon:   #7a98a8;
+
+  /* Status */
+  --color-status-waiting:     #92400e;
+  --color-status-waiting-bg:  #fff7ed;
+  --color-status-treating:    #1e40af;
+  --color-status-treating-bg: #dbeafe;
+  --color-status-done:        #374151;
+  --color-status-done-bg:     #f3f4f6;
+  --color-status-referred:    #5b21b6;
+  --color-status-referred-bg: #ede9fe;
+  --color-status-critical:    #b91c1c;
+  --color-status-critical-bg: #fee2e2;
+  --color-status-stable:      #15803d;
+  --color-status-stable-bg:   #dcfce7;
+  --color-status-sos:         #dc2626;
+  --color-status-sos-bg:      #fee2e2;
+
+  /* Fonts */
+  --font-sans:    'Chivo', 'Noto Sans Kannada', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Chivo', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:    ui-monospace, 'Courier New', monospace;
+  --font-kannada: 'Noto Sans Kannada', 'Chivo', ui-sans-serif, sans-serif;
+  --font-tamil:   'Noto Sans Tamil', 'Chivo', ui-sans-serif, sans-serif;
+}
+
+/* ─── Base ──────────────────────────────────────────────────────────────── */
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--frame);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── App shell layout ──────────────────────────────────────────────────── */
+/* The outer #root stays dark-navy (frame); the content lives on a white "sheet"
+   inset with rounded corners — exactly the Byteclub visual language. */
+
+.app-frame {
+  background: var(--frame);
+  color: var(--ink);
+  min-height: 100%;
+}
+
+/* Sheet: white card inside the dark frame */
+.app-sheet {
+  background: var(--sheet);
+  min-height: 100vh;
+}
+
+@media (min-width: 1024px) {
+  .app-sheet {
+    margin: 8px 8px 8px 0;
+    min-height: calc(100vh - 16px);
+    border-radius: 20px;
+    overflow: clip;
+  }
+}
+
+/* ─── Sidebar: dark night field ─────────────────────────────────────────── */
+.sidebar-root {
+  background: var(--frame);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Navigation pill animation ─────────────────────────────────────────── */
+/* The active nav item gets a mint-green pill that slides between pages */
+.nav-pill-bg {
+  background: var(--mint);
+}
+
+/* ─── Page Band (chapter header) ─────────────────────────────────────────── */
+/* Full-width coloured header, black uppercase title, animated slide-up */
+.page-band {
+  position: relative;
+  overflow: hidden;
+  padding: 2rem 2rem 1.5rem;
+}
+.page-band-title {
+  font-size: clamp(2rem, 1.4rem + 3vw, 4rem);
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+.page-band-lead {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  opacity: 0.75;
+}
+
+/* Band tones (matching Byteclub palette exactly) */
+.band-ward  { background: #dcecf7; color: #0b2a3c; }
+.band-linen { background: #edf3f8; color: #0b2a3c; }
+.band-mint  { background: #9fe5cf; color: #0b2a3c; }
+.band-teal  { background: #0b7a75; color: #ffffff; }
+.band-night { background: #0b2a3c; color: #f2f2f2; }
+.band-sand  { background: #f0f5fa; color: #0b2a3c; }
+
+/* ─── Band chips (triage status) ─────────────────────────────────────────── */
+.chip-red    { background: #c4242a; color: #ffffff; border-color: #c4242a; }
+.chip-yellow { background: #fff1c2; color: #5c3d00; border-color: #d9a400; }
+.chip-green  { background: #dcf5e4; color: #0d3b1e; border-color: #5fb47f; }
+
+/* ─── Urgent flash banner ────────────────────────────────────────────────── */
+@keyframes urgent-flash {
+  0%, 100% { border-color: #b91c1c; background-color: #fef2f2; }
+  50%       { border-color: #fca5a5; background-color: #fee2e2; }
+}
+.urgent-flash {
+  animation: urgent-flash 1.2s ease-in-out infinite;
+}
+
+/* ─── Waiting-room board flash ──────────────────────────────────────────── */
+@keyframes board-call {
+  0%, 100% { background-color: #9fe5cf; color: #0b2a3c; }
+  50%       { background-color: #0b2a3c; color: #9fe5cf; }
+}
+.board-call {
+  animation: board-call 0.8s step-end infinite;
+}
+
+/* ─── Pulse status dot ───────────────────────────────────────────────────── */
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+.pulse-red { animation: pulse-red 1s ease-in-out infinite; }
+
+/* ─── Reduced motion ─────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .urgent-flash, .board-call, .pulse-red {
+    animation-duration: 3s;
+  }
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c8d0db; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9aaabb; }
+
+/* Dark scrollbar inside sidebar */
+.sidebar-root ::-webkit-scrollbar-thumb { background: #1c4a60; }
+
+/* ─── Print: OPD slip only ───────────────────────────────────────────────── */
+@media print {
+  body * { visibility: hidden; }
+  .print-slip, .print-slip * { visibility: visible; }
+  .print-slip {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 80mm;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+/* ─── Utility helpers ───────────────────────────────────────────────────── */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+.tracking-tight-ultra { letter-spacing: -0.04em; }

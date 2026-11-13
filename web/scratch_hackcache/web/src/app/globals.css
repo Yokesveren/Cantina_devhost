@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+:root {
+  /* Hospital palette: navy ink and frame, scrub teal for actions, clinical mint highlights, ward-blue and linen fields.
+     Status colours (emergency red, priority amber, routine green) are separate and never reused as brand. */
+  --frame: #0b2a3c;
+  --sheet: #ffffff;
+  --raised: #f5f8fa;
+  --edge: #e1e7ec;
+  --rule: #eef2f5;
+  --control: #c9d2d9;
+  --ink: #0b2a3c;
+  --muted: #56636b;
+  --accent: #0b7a75;
+  --sky: #dcecf7;
+  --sand: #edf3f8;
+  --mustard: #9fe5cf;
+  --background: var(--frame);
+  --foreground: var(--ink);
+}
+
+.app-frame {
+  background: var(--frame);
+  color: var(--ink);
+}
+.app-sheet {
+  background: var(--sheet);
+  min-height: 100vh;
+}
+@media (min-width: 1024px) {
+  .app-sheet {
+    margin: 8px 8px 8px 0;
+    min-height: calc(100vh - 16px);
+    border-radius: 20px;
+    overflow: clip;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-chivo);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-chivo), Arial, Helvetica, sans-serif;
+}
+
+/* Urgent flag banner: flashing border until marked seen (S5). */
+@keyframes urgent-flash {
+  0%, 100% { border-color: #b91c1c; background-color: #fef2f2; }
+  50% { border-color: #fca5a5; background-color: #fee2e2; }
+}
+.urgent-flash {
+  animation: urgent-flash 1s ease-in-out infinite;
+}
+
+/* Waiting-room board: visual call for patients who cannot hear the call. */
+@keyframes board-call {
+  0%, 100% { background-color: #9fe5cf; color: #0b2a3c; }
+  50% { background-color: #0b2a3c; color: #9fe5cf; }
+}
+.board-call {
+  animation: board-call 0.8s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .urgent-flash, .board-call {
+    animation-duration: 3s;
+  }
+}
+
+/* Printing the OPD slip from the counter: only the slip is printed. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-slip, .print-slip * {
+    visibility: visible;
+  }
+  .print-slip {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 80mm;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

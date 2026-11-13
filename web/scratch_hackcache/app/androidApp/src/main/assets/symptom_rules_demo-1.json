@@ -1,0 +1,94 @@
+{
+  "ruleset_version": "demo-1",
+  "warning_signs": [
+    {
+      "id": "chest_pain",
+      "text": {
+        "en": "Chest pain, tightness or pressure",
+        "hi": "छाती में दर्द, जकड़न या दबाव",
+        "ur": "سینے میں درد، جکڑن یا دباؤ"
+      }
+    },
+    {
+      "id": "breathing_difficulty",
+      "text": {
+        "en": "Difficulty breathing or severe shortness of breath",
+        "hi": "सांस लेने में तकलीफ या बहुत ज्यादा सांस फूलना",
+        "ur": "سانس لینے میں دشواری یا بہت زیادہ سانس پھولنا"
+      }
+    },
+    {
+      "id": "fainting",
+      "text": {
+        "en": "Fainting, collapse or not responding",
+        "hi": "बेहोशी, गिर जाना या जवाब न देना",
+        "ur": "بے ہوشی، گر جانا یا جواب نہ دینا"
+      }
+    },
+    {
+      "id": "fits",
+      "text": {
+        "en": "Fits, seizures or convulsions",
+        "hi": "दौरे या झटके आना",
+        "ur": "دورے یا جھٹکے آنا"
+      }
+    },
+    {
+      "id": "heavy_bleeding",
+      "text": {
+        "en": "Heavy bleeding that won't stop",
+        "hi": "भारी रक्तस्राव जो रुक न रहा हो",
+        "ur": "بہت زیادہ خون بہنا جو رک نہ رہا ہو"
+      }
+    },
+    {
+      "id": "severe_injury",
+      "text": {
+        "en": "Severe injury or broken bone with deformity",
+        "hi": "गंभीर चोट या विकृति के साथ टूटी हड्डी",
+        "ur": "شدید چوٹ یا ٹیڑھی ٹوٹی ہڈی"
+      }
+    },
+    {
+      "id": "pregnancy_warning",
+      "text": {
+        "en": "Bleeding or severe abdominal pain in pregnancy",
+        "hi": "गर्भावस्था में रक्तस्राव या गंभीर पेट दर्द",
+        "ur": "حمل میں خون آنا یا پیٹ میں شدید درد"
+      }
+    },
+    {
+      "id": "baby_warning",
+      "text": {
+        "en": "Baby not feeding, unusually sleepy or turning blue",
+        "hi": "बच्चा दूध नहीं पी रहा, बहुत सुस्त है या नीला पड़ रहा है",
+        "ur": "بچہ دودھ نہیں پی رہا، بہت سست ہے یا نیلا پڑ رہا ہے"
+      }
+    },
+    {
+      "id": "fever_stiff_neck",
+      "text": {
+        "en": "High fever with stiff neck, severe headache or confusion",
+        "hi": "गर्दन में जकड़न, तेज सिरदर्द या भ्रम के साथ तेज बुखार",
+        "ur": "گردن میں اکڑن، شدید سر درد یا الجھن کے ساتھ تیز بخار"
+      }
+    },
+    {
+      "id": "stroke_warning",
+      "text": {
+        "en": "Face drooping, arm weakness or slurred speech",
+        "hi": "चेहरा लटकना, हाथ में कमजोरी या बोली लड़खड़ाना",
+        "ur": "چہرہ لٹکنا، بازو میں کمزوری یا زبان لڑکھڑانا"
+      }
+    },
+    {
+      "id": "poisoning",
+      "text": {
+        "en": "Suspected poisoning, snake bite or chemical exposure",
+        "hi": "जहर, सांप का काटना या रासायनिक संपर्क की आशंका",
+        "ur": "زہر، سانپ کے کاٹنے یا کیمیکل لگنے کا شک"
+      }
+    }
+  ],
+  "note": "Demo rules for the hackathon. A clinician must review every sign before real use. Kashmiri shows Urdu and Dogri shows Hindi."
+}
