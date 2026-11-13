@@ -83,7 +83,8 @@ flowchart LR
 
 | Field app | HQ dashboard | Uplink banner |
 |---|---|---|
-| ![Field app](docs/images/field-app.png) | ![HQ dashboard](docs/images/hq-dashboard.png) | ![Uplink banner](docs/images/uplink-banner.png) |
+| ![Field app](docs/images/field-app.png) | ![HQ dashboard](<img width="1911" height="911" alt="Dashboard" src="https://github.com/user-attachments/assets/38e3248f-5f0a-4b4c-9ce0-49bee9b769c6" />
+) | ![Uplink banner](docs/images/uplink-banner.png) |
 
 > Add the three images to `docs/images/` with these file names.
 
