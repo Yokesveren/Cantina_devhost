@@ -36,6 +36,7 @@ import {
   formatHLC,
   timeAgo,
 } from "../../lib/deadDropEngine";
+import { useDeadDropSync } from "../../services/useDeadDropSync";
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 
@@ -100,6 +101,9 @@ export default function Overview() {
   const [seeding, setSeeding] = useState(false);
   const [seeded, setSeeded] = useState(false);
 
+  // Realtime Database sync directly from mobile app
+  const { ops: rtdbOps, nodes: rtdbNodes, uplinkStatus } = useDeadDropSync();
+
   useEffect(() => {
     const unsubs = [
       subscribeOps(setOps),
@@ -110,13 +114,32 @@ export default function Overview() {
     return () => unsubs.forEach((u) => u());
   }, []);
 
-  const equivAlerts = detectEquivocation(ops);
-  const ledgerAlerts = checkLedgerIntegrity(ops, ledger);
-  const stateHash = computeStateHash(ops);
+  // Merge Firestore demo ops with live Realtime Database ops from mobile
+  const allOps = [...rtdbOps.map(o => ({
+    opId: o.opId,
+    dev: o.dev,
+    seq: o.seq,
+    kind: o.kind,
+    region: o.region,
+    hlc: o.hlc,
+    body: o.body,
+    sig: o.sig,
+    uploadedByDevice: o.uploadedByDevice,
+    timestamp: typeof o.timestamp === "string" ? new Date(o.timestamp).getTime() : o.timestamp,
+  })), ...ops].filter((op, idx, self) => self.findIndex(o => o.opId === op.opId) === idx);
+
+  const equivAlerts = detectEquivocation(allOps);
+  const ledgerAlerts = checkLedgerIntegrity(allOps, ledger);
+  const stateHash = computeStateHash(allOps);
   const foundPct = computeFoundPercent(entities);
   const shelterOccPct = computeShelterOccupancy(entities);
-  const onlineNode = nodes.find((n) => n.onlineStatus === "ONLINE");
-  const recentOps = ops.slice(0, 5);
+  const onlineNode = nodes.find((n) => n.onlineStatus === "ONLINE") || (uplinkStatus ? {
+    deviceId: uplinkStatus.activeGatewayDevice,
+    userName: uplinkStatus.gatewayUserName,
+    totalOpsHeld: uplinkStatus.totalOpsPushed,
+    lastInternetSync: uplinkStatus.lastUplinkTimestamp,
+  } : undefined);
+  const recentOps = allOps.slice(0, 7);
   const shelters = entities.filter((e) => e.type === "shelter");
 
   async function handleSeed() {
