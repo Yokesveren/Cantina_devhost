@@ -1,15 +1,47 @@
 package com.example.deaddrop
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.deaddrop.BuildConfig
+import com.example.deaddrop.core.crypto.KeyPair
 import com.example.deaddrop.core.crypto.createCrypto
+import com.example.deaddrop.core.model.Op
 import com.example.deaddrop.core.node.Node
 import com.example.deaddrop.core.state.DerivedState
+import com.example.deaddrop.security.KeyStoreManager
 import com.example.deaddrop.sim.VirtualNetwork
+import com.example.deaddrop.store.PersistentOpStore
+import com.example.deaddrop.transport.NearbyConnectionsTransport
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
+
+@OptIn(ExperimentalEncodingApi::class, kotlinx.serialization.InternalSerializationApi::class)
+@Serializable
+data class DemoPlanData(
+    val authorityPublicKey: String,
+    val authorityPrivateKey: String,
+    val regionKeyA: String,
+    val devices: List<DemoDeviceData>,
+    val genesisOps: List<Op>
+)
+
+@OptIn(kotlinx.serialization.InternalSerializationApi::class)
+@Serializable
+data class DemoDeviceData(
+    val id: String,
+    val userName: String,
+    val role: String,
+    val region: String,
+    val publicKey: String,
+    val privateKey: String
+)
 
 data class SimScenarioResult(
     val name: String,
@@ -17,14 +49,21 @@ data class SimScenarioResult(
     val details: String
 )
 
-class MainViewModel : ViewModel() {
+data class FieldUpdate(
+    val field: String,
+    val newValue: String,
+    val replacesOpIds: List<String>
+)
+
+@OptIn(ExperimentalEncodingApi::class)
+class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val crypto = createCrypto()
-    private val regionKey = crypto.generateSymmetricKey()
+    val persistentOpStore = PersistentOpStore(application)
+    val nearbyTransport: NearbyConnectionsTransport
 
-    // Local device node
     val localNode: Node
+    val regionKeyA: ByteArray
 
-    // Simulator virtual network & nodes
     val simNetwork = VirtualNetwork(viewModelScope)
     val simNodes: List<Node>
 
@@ -37,28 +76,56 @@ class MainViewModel : ViewModel() {
     private val _simScenarioResults = MutableStateFlow<List<SimScenarioResult>>(emptyList())
     val simScenarioResults: StateFlow<List<SimScenarioResult>> = _simScenarioResults.asStateFlow()
 
+    val demoPlan: DemoPlanData
+    private val json = Json { ignoreUnknownKeys = true }
+
     init {
-        // Setup local node
-        val localKeys = crypto.generateKeyPair()
+        // Load demo_plan.json from assets
+        val jsonText = application.assets.open("demo_plan.json").bufferedReader().use { it.readText() }
+        demoPlan = json.decodeFromString<DemoPlanData>(jsonText)
+
+        val authorityPub = Base64.decode(demoPlan.authorityPublicKey)
+        regionKeyA = Base64.decode(demoPlan.regionKeyA)
+
+        val deviceConfig = demoPlan.devices.find { it.id == BuildConfig.NODE_DEVICE_ID }
+            ?: demoPlan.devices.first()
+
+        val devPubKey = Base64.decode(deviceConfig.publicKey)
+        val devPrivKey = Base64.decode(deviceConfig.privateKey)
+        val deviceKeyPair = KeyPair(publicKey = devPubKey, privateKey = devPrivKey)
+
+        val allowedPublicKeysSet = buildSet {
+            add(authorityPub)
+            for (dev in demoPlan.devices) {
+                add(Base64.decode(dev.publicKey))
+            }
+        }
+
+        if (persistentOpStore.getAllOps().isEmpty()) {
+            persistentOpStore.addOps(demoPlan.genesisOps)
+        }
+
+        nearbyTransport = NearbyConnectionsTransport(application, BuildConfig.NODE_DEVICE_ID, viewModelScope)
+
         localNode = Node(
-            deviceId = "PhoneA1",
-            keys = localKeys,
+            deviceId = BuildConfig.NODE_DEVICE_ID,
+            keys = deviceKeyPair,
+            opStore = persistentOpStore,
+            transport = nearbyTransport,
             crypto = crypto,
-            regionKeys = mapOf("A" to regionKey)
+            regionKeys = mapOf("A" to regionKeyA),
+            allowedPublicKeys = allowedPublicKeysSet,
+            authorityPublicKey = authorityPub
         )
 
-        // Seed initial mint for stock testing
-        localNode.createMintOp("blanket", "dev:PhoneA1", 15, region = "A")
-        localNode.createMintOp("water", "dev:PhoneA1", 30, region = "A")
-        localNode.createMintOp("boat", "dev:PhoneA1", 1, region = "A")
+        nearbyTransport.onPeerConnected = { peerId ->
+            viewModelScope.launch {
+                localNode.startSyncWith(peerId)
+            }
+        }
 
-        // Seed initial open need
-        localNode.createSetOp("need:PhoneA1:1", "category", "Food & Water", region = "A")
-        localNode.createSetOp("need:PhoneA1:1", "peopleCount", "12", region = "A")
-        localNode.createSetOp("need:PhoneA1:1", "urgency", "High", region = "A")
-        localNode.createSetOp("need:PhoneA1:1", "status", "open", region = "A")
+        nearbyTransport.startAdvertisingAndDiscovery()
 
-        // Setup 3 virtual nodes for in-app simulator
         simNodes = (1..3).map { i ->
             val id = "SimNode$i"
             val transport = simNetwork.createTransport(id)
@@ -67,11 +134,21 @@ class MainViewModel : ViewModel() {
                 keys = crypto.generateKeyPair(),
                 transport = transport,
                 crypto = crypto,
-                regionKeys = mapOf("A" to regionKey)
+                regionKeys = mapOf("A" to regionKeyA)
             )
         }
 
+        viewModelScope.launch {
+            persistentOpStore.opFlow.collect {
+                refreshState()
+            }
+        }
+
         refreshState()
+    }
+
+    fun toggleRadio(enabled: Boolean) {
+        nearbyTransport.setRadioState(enabled)
     }
 
     fun unlock(passcode: String): Boolean {
@@ -86,9 +163,15 @@ class MainViewModel : ViewModel() {
         _uiState.value = localNode.getDerivedState()
     }
 
+    fun resetDemoToGenesis() {
+        persistentOpStore.clear()
+        persistentOpStore.addOps(demoPlan.genesisOps)
+        refreshState()
+    }
+
     fun addNeed(category: String, peopleCount: Int, urgency: String, note: String) {
         val seq = System.currentTimeMillis()
-        val entityId = "need:PhoneA1:$seq"
+        val entityId = "need:${localNode.deviceId}:$seq"
         localNode.createSetOp(entityId, "category", category, region = "A")
         localNode.createSetOp(entityId, "peopleCount", peopleCount.toString(), region = "A")
         localNode.createSetOp(entityId, "urgency", urgency, region = "A")
@@ -97,28 +180,39 @@ class MainViewModel : ViewModel() {
         refreshState()
     }
 
-    fun addPerson(name: String, ageGroup: String, condition: String, status: String) {
+    fun addPerson(name: String, ageGroup: String, condition: String, status: String, whereNow: String = "", note: String = "") {
         val seq = System.currentTimeMillis()
-        val entityId = "person:PhoneA1:$seq"
+        val entityId = "person:${localNode.deviceId}:$seq"
         localNode.createSetOp(entityId, "displayName", name, region = "A")
         localNode.createSetOp(entityId, "ageGroup", ageGroup, region = "A")
         localNode.createSetOp(entityId, "condition", condition, region = "A")
         localNode.createSetOp(entityId, "status", status, region = "A")
+        if (whereNow.isNotBlank()) localNode.createSetOp(entityId, "whereNow", whereNow, region = "A")
+        if (note.isNotBlank()) localNode.createSetOp(entityId, "note", note, region = "A")
         refreshState()
     }
 
-    fun addShelter(name: String, capacity: Int, occupancy: Int) {
+    fun editEntityFields(entityId: String, updates: List<FieldUpdate>) {
+        for (update in updates) {
+            localNode.createSetOp(entityId, update.field, update.newValue, replaces = update.replacesOpIds, region = "A")
+        }
+        refreshState()
+    }
+
+    fun addShelter(name: String, capacity: Int, occupancy: Int, locationText: String = "Main Road") {
         val seq = System.currentTimeMillis()
-        val entityId = "shelter:PhoneA1:$seq"
+        val entityId = "shelter:${localNode.deviceId}:$seq"
         localNode.createSetOp(entityId, "name", name, region = "A")
         localNode.createSetOp(entityId, "capacity", capacity.toString(), region = "A")
         localNode.createSetOp(entityId, "occupancy", occupancy.toString(), region = "A")
-        localNode.createSetOp(entityId, "status", "open", region = "A")
+        localNode.createSetOp(entityId, "locationText", locationText, region = "A")
+        localNode.createSetOp(entityId, "status", "Open", region = "A")
         refreshState()
     }
 
     fun giveStock(item: String, targetAccount: String, amount: Long): Boolean {
-        val moveOp = localNode.createMoveOp(item, "dev:PhoneA1", targetAccount, amount, region = "A")
+        val fromAccount = "dev:${localNode.deviceId}"
+        val moveOp = localNode.createMoveOp(item, fromAccount, targetAccount, amount, region = "A")
         if (moveOp != null) {
             refreshState()
             return true
@@ -132,14 +226,13 @@ class MainViewModel : ViewModel() {
     }
 
     fun panicWipe() {
-        // Clear all stored ops & reset seq counter
-        val ops = localNode.opStore.getAllOps()
-        // Re-initialize state
+        persistentOpStore.clear()
+        KeyStoreManager.panicWipe(getApplication())
         _uiState.value = DerivedState(
             entities = emptyMap(),
             conflicts = emptyList(),
             balances = emptyMap(),
-            alerts = listOf("PANIC WIPE EXECUTED. All local keys and database cleared."),
+            alerts = listOf("PANIC WIPE EXECUTED. Keys and database wiped."),
             stateHash = "CLEARED"
         )
         _isUnlocked.value = false
