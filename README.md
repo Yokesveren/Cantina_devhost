@@ -83,8 +83,8 @@ flowchart LR
 
 | Field app | HQ dashboard | Uplink banner |
 |---|---|---|
-| ![Field app](<img width="819" height="1600" alt="image" src="https://github.com/user-attachments/assets/88876a06-fbae-4566-8cc1-6e3aefabc123" />)
- | ![HQ dashboard](<img width="1911" height="911" alt="Dashboard" src="https://github.com/user-attachments/assets/38e3248f-5f0a-4b4c-9ce0-49bee9b769c6" />)|
+| ![Field app]<img width="819" height="1600" alt="image" src="https://github.com/user-attachments/assets/88876a06-fbae-4566-8cc1-6e3aefabc123" />
+ | ![HQ dashboard]<img width="1911" height="911" alt="Dashboard" src="https://github.com/user-attachments/assets/38e3248f-5f0a-4b4c-9ce0-49bee9b769c6" />|
 
 > Add the three images to `docs/images/` with these file names.
 
