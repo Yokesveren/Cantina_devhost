@@ -29,6 +29,7 @@ class Node(
     private var seqCounter: Long = 0
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private val peerSummaries = mutableMapOf<PeerId, RangeSetSummary>()
+    private val activeConnectedPeers = mutableSetOf<PeerId>()
 
     val bytesSent = MutableStateFlow(0L)
     val bytesReceived = MutableStateFlow(0L)
@@ -38,6 +39,12 @@ class Node(
         seqCounter = existingMaxSeq
 
         if (transport != null) {
+            scope.launch {
+                transport.peers.collect { peersSet ->
+                    activeConnectedPeers.clear()
+                    activeConnectedPeers.addAll(peersSet)
+                }
+            }
             scope.launch {
                 transport.incoming.collect { (peer, bytes) ->
                     bytesReceived.value += bytes.size
@@ -92,6 +99,7 @@ class Node(
         val signedOp = unsignedOp.copy(sig = sig)
 
         opStore.addOp(signedOp)
+        broadcastOpToPeers(signedOp)
         return signedOp
     }
 
@@ -124,6 +132,7 @@ class Node(
         val signedOp = unsignedOp.copy(sig = sig)
 
         opStore.addOp(signedOp)
+        broadcastOpToPeers(signedOp)
         return signedOp
     }
 
@@ -168,6 +177,7 @@ class Node(
         val signedOp = unsignedOp.copy(sig = sig)
 
         opStore.addOp(signedOp)
+        broadcastOpToPeers(signedOp)
         return signedOp
     }
 
@@ -179,6 +189,19 @@ class Node(
             if (!keyFound) return false
         }
         return opStore.addOp(op)
+    }
+
+    private fun broadcastOpToPeers(op: Op, exceptPeer: PeerId? = null) {
+        if (transport == null || activeConnectedPeers.isEmpty()) return
+        val currentPeers = activeConnectedPeers.toSet()
+        scope.launch {
+            val batchMsg = SyncMessage.Ops(listOf(op))
+            for (peer in currentPeers) {
+                if (peer != exceptPeer) {
+                    sendMsg(peer, batchMsg)
+                }
+            }
+        }
     }
 
     suspend fun startSyncWith(peer: PeerId) {
@@ -218,7 +241,10 @@ class Node(
 
             is SyncMessage.Ops -> {
                 for (op in message.batch) {
-                    verifyAndAddOp(op)
+                    val addedNew = verifyAndAddOp(op)
+                    if (addedNew) {
+                        broadcastOpToPeers(op, exceptPeer = peer)
+                    }
                 }
             }
 

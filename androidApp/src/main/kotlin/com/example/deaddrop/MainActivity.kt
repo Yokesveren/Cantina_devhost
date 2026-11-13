@@ -99,7 +99,6 @@ fun MainAppScreen(viewModel: MainViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val simResults by viewModel.simScenarioResults.collectAsState()
     val connectedPeers by viewModel.nearbyTransport.peers.collectAsState()
-    val isRadioOn by viewModel.nearbyTransport.isRadioOn.collectAsState()
     val bytesSent by viewModel.nearbyTransport.totalBytesSent.collectAsState()
     val bytesReceived by viewModel.nearbyTransport.totalBytesReceived.collectAsState()
 
@@ -256,18 +255,19 @@ fun MainAppScreen(viewModel: MainViewModel) {
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(if (isRadioOn) "P2P: ON " else "P2P: OFF ", color = if (isRadioOn) MintTagText else Color.Gray, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                        Switch(
-                            checked = isRadioOn,
-                            onCheckedChange = { viewModel.toggleRadio(it) },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = MintPillBg,
-                                uncheckedThumbColor = Color.LightGray,
-                                uncheckedTrackColor = Color.DarkGray
-                            ),
-                            modifier = Modifier.height(24.dp)
-                        )
+                        val p2pStatusText = if (connectedPeers.isEmpty()) "Searching for nearby phones" else "Connected to ${connectedPeers.size} nearby"
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFF08202E)
+                        ) {
+                            Text(
+                                p2pStatusText,
+                                color = MintTagText,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
                     }
                 }
 
@@ -666,15 +666,10 @@ fun EditPersonDialog(
             Button(onClick = {
                 val updates = mutableListOf<FieldUpdate>()
 
-                val currentStatusOpIds = entity.rawLiveFields["status"]?.map { it.opId } ?: emptyList()
-                val currentCondOpIds = entity.rawLiveFields["condition"]?.map { it.opId } ?: emptyList()
-                val currentWhereOpIds = entity.rawLiveFields["whereNow"]?.map { it.opId } ?: emptyList()
-                val currentNoteOpIds = entity.rawLiveFields["note"]?.map { it.opId } ?: emptyList()
-
-                if (status != entity.fields["status"]) updates.add(FieldUpdate("status", status, currentStatusOpIds))
-                if (condition != entity.fields["condition"]) updates.add(FieldUpdate("condition", condition, currentCondOpIds))
-                if (whereNow != entity.fields["whereNow"]) updates.add(FieldUpdate("whereNow", whereNow, currentWhereOpIds))
-                if (note != entity.fields["note"]) updates.add(FieldUpdate("note", note, currentNoteOpIds))
+                if (status != entity.fields["status"]) updates.add(FieldUpdate("status", status, emptyList()))
+                if (condition != entity.fields["condition"]) updates.add(FieldUpdate("condition", condition, emptyList()))
+                if (whereNow != entity.fields["whereNow"]) updates.add(FieldUpdate("whereNow", whereNow, emptyList()))
+                if (note != entity.fields["note"]) updates.add(FieldUpdate("note", note, emptyList()))
 
                 if (updates.isNotEmpty()) {
                     onSaveFields(updates)

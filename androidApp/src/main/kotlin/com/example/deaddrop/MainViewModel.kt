@@ -182,8 +182,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        nearbyTransport.startAdvertisingAndDiscovery()
-
         simNodes = (1..3).map { i ->
             val id = "SimNode$i"
             val transport = simNetwork.createTransport(id)
@@ -206,7 +204,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleRadio(enabled: Boolean) {
-        nearbyTransport.setRadioState(enabled)
+        // P2P scanning pulse is fully automated
     }
 
     fun unlock(passcode: String): Boolean {
